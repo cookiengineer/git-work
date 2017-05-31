@@ -1,0 +1,23 @@
+{
+	"name": "git-work",
+	"version": "0.0.1",
+	"description": "A more efficient way to manage your GitHub issues. Offline-ready. Multi-remote. In the Terminal.",
+	"main": "./build/git-work.js",
+	"bin": {
+		"git-work": "./build/git-work.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cookiengineer/git-work.git"
+	},
+	"keywords": [
+		"git",
+		"diff"
+	],
+	"author": "Cookie Engineer",
+	"license": "GPL-2.0",
+	"bugs": {
+		"url": "https://github.com/cookiengineer/git-work/issues"
+	},
+	"homepage": "https://github.com/cookiengineer/git-work#readme"
+}
