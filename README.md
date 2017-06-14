@@ -24,16 +24,15 @@ you never have to visit the GitHub web interface again :)
 ![Screenshot](./guide/screenshot.png)
 
 
-# Requirements
+## Requirements
 
-`git work` is implemented in `node.js`, so this is the only
-requirement.
+- `node` (node.js) with ES2016 support
 
 
 ## Installation
 
 The installation process is quite simple. There are two
-ways available:
+ways to do it:
 
 1. Download the [build/git-work.js](./build/git-work.js) file to
    `/usr/bin/git-work` and make it executable.
