@@ -51,9 +51,9 @@ const GIT_WORK = {
 	if (user_config !== null) {
 
 		GIT_WORK.email = user_config
-		.split('\n')
-		.filter(val => val.trim().substr(0, 5) === 'email')
-		.map(val => val.split('=')[1].trim())[0] || null;
+			.split('\n')
+			.filter(val => val.trim().substr(0, 5) === 'email')
+			.map(val => val.split('=')[1].trim())[0] || null;
 
 	}
 
@@ -62,47 +62,47 @@ const GIT_WORK = {
 		let remote_id = null;
 
 		GIT_WORK.remotes = repo_config
-		.split('\n')
-		.map(val => val.trim())
-		.filter(val => /^url|\[remote/g.test(val))
-		.map(function(line) {
+			.split('\n')
+			.map(val => val.trim())
+			.filter(val => /^url|\[remote/g.test(val))
+			.map(function(line) {
 
-			if (/^\[remote/.test(line)) {
+				if (/^\[remote/.test(line)) {
 
-				remote_id = line.split(/"|\]/g)[1];
+					remote_id = line.split(/"|\]/g)[1];
 
-			} else if (/^url/.test(line) && /github\.com/g.test(line)) {
+				} else if (/^url/.test(line) && /github\.com/g.test(line)) {
 
-				let url = line.split('=')[1].trim();
+					let url = line.split('=')[1].trim();
 
-				if (/^git@/.test(url)) {
+					if (/^git@/.test(url)) {
 
-					let tmp = url.split(':')[1].split('.git')[0].split('/');
+						let tmp = url.split(':')[1].split('.git')[0].split('/');
 
-					return {
-						id:   remote_id,
-						orga: tmp[0],
-						repo: tmp[1]
-					};
+						return {
+							id:   remote_id,
+							orga: tmp[0],
+							repo: tmp[1]
+						};
 
-				} else if (/^https:\/\//g.test(url)) {
+					} else if (/^https:\/\//g.test(url)) {
 
-					let tmp = url.split('github.com/')[1].split('.git')[0].split('/');
+						let tmp = url.split('github.com/')[1].split('.git')[0].split('/');
 
-					return {
-						id:   remote_id,
-						orga: tmp[0],
-						repo: tmp[1]
-					};
+						return {
+							id:   remote_id,
+							orga: tmp[0],
+							repo: tmp[1]
+						};
+
+					}
 
 				}
 
-			}
 
+				return null;
 
-			return null;
-
-		}).filter(val => val !== null);
+			}).filter(val => val !== null);
 
 	}
 

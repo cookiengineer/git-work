@@ -15,6 +15,7 @@ cat \
 	"./source/_config.js" \
 	"./source/_console.js" \
 	"./source/git-work-help.js" \
+	"./source/git-work-create.js" \
 	"./source/git-work-show.js" \
 	"./source/git-work-sync.js" \
 	"./source/_init.js" \

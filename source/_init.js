@@ -2,7 +2,7 @@
 (function(global, argv) {
 
 	let args   = Array.from(argv).filter(v => !v.startsWith('--'));
-	let action = argv.find(v => /^(sync|show)$/g.test(v));
+	let action = argv.find(v => /^(create|sync|show)$/g.test(v));
 
 	if (action !== undefined && typeof GIT_WORK[action] === 'function') {
 
@@ -13,10 +13,10 @@
 			remote:    null
 		};
 
-
 		Array.from(argv).filter(v => v.startsWith('--')).forEach(value => {
 
 			let tmp = value.substr(2).split('=');
+
 			if (tmp.length === 2) {
 
 				if (tmp[1].startsWith('"')) tmp[1] = tmp[1].substr(1);

@@ -26,13 +26,22 @@ GIT_WORK.help = (function(global, cwd) {
 		} else {
 
 			console.log('');
-			console.info('git work v2017.05.31');
+			console.info('git work v2017.12.12');
+			console.log('');
+
+			if (GIT_WORK.token !== null) {
+				console.info('TOKEN: ' + GIT_WORK.token);
+			} else {
+				console.error('TOKEN: No token found in "' + cwd + '/.github/TOKEN');
+			}
+
 			console.log('');
 			console.log('Usage: git work [action] [filters]');
 			console.log('');
 			console.log('');
 			console.log('Available Actions:');
 			console.log('');
+			console.log('    create            creates an issue');
 			console.log('    sync              syncs all open issues');
 			console.log('    show              shows all open issues');
 			console.log('    show [number]     shows issue details');
@@ -47,6 +56,7 @@ GIT_WORK.help = (function(global, cwd) {
 			console.log('Examples:');
 			console.log('');
 			console.log('    git work sync;');
+			console.log('    git work create --title="New issue" --comment="Plz work on thiz"');
 			console.log('    git work show;');
 			console.log('    git work show 123;');
 			console.log('');

@@ -51,9 +51,9 @@ const GIT_WORK = {
 	if (user_config !== null) {
 
 		GIT_WORK.email = user_config
-		.split('\n')
-		.filter(val => val.trim().substr(0, 5) === 'email')
-		.map(val => val.split('=')[1].trim())[0] || null;
+			.split('\n')
+			.filter(val => val.trim().substr(0, 5) === 'email')
+			.map(val => val.split('=')[1].trim())[0] || null;
 
 	}
 
@@ -62,47 +62,47 @@ const GIT_WORK = {
 		let remote_id = null;
 
 		GIT_WORK.remotes = repo_config
-		.split('\n')
-		.map(val => val.trim())
-		.filter(val => /^url|\[remote/g.test(val))
-		.map(function(line) {
+			.split('\n')
+			.map(val => val.trim())
+			.filter(val => /^url|\[remote/g.test(val))
+			.map(function(line) {
 
-			if (/^\[remote/.test(line)) {
+				if (/^\[remote/.test(line)) {
 
-				remote_id = line.split(/"|\]/g)[1];
+					remote_id = line.split(/"|\]/g)[1];
 
-			} else if (/^url/.test(line) && /github\.com/g.test(line)) {
+				} else if (/^url/.test(line) && /github\.com/g.test(line)) {
 
-				let url = line.split('=')[1].trim();
+					let url = line.split('=')[1].trim();
 
-				if (/^git@/.test(url)) {
+					if (/^git@/.test(url)) {
 
-					let tmp = url.split(':')[1].split('.git')[0].split('/');
+						let tmp = url.split(':')[1].split('.git')[0].split('/');
 
-					return {
-						id:   remote_id,
-						orga: tmp[0],
-						repo: tmp[1]
-					};
+						return {
+							id:   remote_id,
+							orga: tmp[0],
+							repo: tmp[1]
+						};
 
-				} else if (/^https:\/\//g.test(url)) {
+					} else if (/^https:\/\//g.test(url)) {
 
-					let tmp = url.split('github.com/')[1].split('.git')[0].split('/');
+						let tmp = url.split('github.com/')[1].split('.git')[0].split('/');
 
-					return {
-						id:   remote_id,
-						orga: tmp[0],
-						repo: tmp[1]
-					};
+						return {
+							id:   remote_id,
+							orga: tmp[0],
+							repo: tmp[1]
+						};
+
+					}
 
 				}
 
-			}
 
+				return null;
 
-			return null;
-
-		}).filter(val => val !== null);
+			}).filter(val => val !== null);
 
 	}
 
@@ -331,13 +331,22 @@ GIT_WORK.help = (function(global, cwd) {
 		} else {
 
 			console.log('');
-			console.info('git work v2017.05.31');
+			console.info('git work v2017.12.12');
+			console.log('');
+
+			if (GIT_WORK.token !== null) {
+				console.info('TOKEN: ' + GIT_WORK.token);
+			} else {
+				console.error('TOKEN: No token found in "' + cwd + '/.github/TOKEN');
+			}
+
 			console.log('');
 			console.log('Usage: git work [action] [filters]');
 			console.log('');
 			console.log('');
 			console.log('Available Actions:');
 			console.log('');
+			console.log('    create            creates an issue');
 			console.log('    sync              syncs all open issues');
 			console.log('    show              shows all open issues');
 			console.log('    show [number]     shows issue details');
@@ -352,6 +361,7 @@ GIT_WORK.help = (function(global, cwd) {
 			console.log('Examples:');
 			console.log('');
 			console.log('    git work sync;');
+			console.log('    git work create --title="New issue" --comment="Plz work on thiz"');
 			console.log('    git work show;');
 			console.log('    git work show 123;');
 			console.log('');
@@ -361,6 +371,101 @@ GIT_WORK.help = (function(global, cwd) {
 			console.log('    git work show --assignee="cookiengineer";');
 			console.log('    git work show --milestone="2017-Q4";');
 			console.log('');
+
+		}
+
+	};
+
+})(typeof global !== 'undefined' ? global : this, process.cwd());
+
+
+GIT_WORK.create = (function(global, cwd) {
+
+	const _fs           = require('fs');
+	const _https        = require('https');
+	const _create_issue = function(remote, issue, callback) {
+
+		let headers = {
+			'User-Agent': 'git-work'
+		};
+
+		if (GIT_WORK.token !== null) {
+			headers['Authorization'] = 'token ' + GIT_WORK.token;
+		}
+
+
+		let json    = JSON.stringify(issue);
+		let request = _https.request({
+			method:   'POST',
+			protocol: 'https:',
+			host:     'api.github.com',
+			path:     '/repos/' + remote.orga + '/' + remote.repo + '/issues',
+			headers:  headers
+		}, function(response) {
+
+			let blob   = '';
+			let data   = null;
+			let result = null;
+
+			response.setEncoding('utf8');
+			response.on('data', chunk => (blob += chunk));
+			response.on('end', _ => {
+
+				try {
+					data = JSON.parse(blob);
+				} catch (err) {
+				}
+
+				if (data instanceof Object) {
+					result = data.url;
+				}
+
+				callback(result);
+
+			});
+
+		});
+
+		request.on('error',   err => callback(null));
+		request.on('timeout', err => callback(null));
+
+		request.setTimeout(10000);
+		request.write(json);
+		request.end();
+
+	};
+
+
+	return function(args, filters) {
+
+		let remotes = GIT_WORK.remotes.filter(remote => {
+			return (filters.remote === null || filters.remote === remote.id);
+		});
+
+		if (remotes.length > 0) {
+
+			let title   = filters.title   || null;
+			let comment = filters.comment || '';
+
+			if (title !== null) {
+
+				console.log('Creating issue for remote "' + remotes[0].id + '" ...');
+
+				_create_issue(remotes[0], {
+					title: title,
+					body:  comment
+				}, result => {
+
+					if (result !== null) {
+						console.info('Success');
+						console.info('Issue URL: "' + result + '"');
+					} else {
+						console.error('GitHub API Error');
+					}
+
+				});
+
+			}
 
 		}
 
@@ -872,7 +977,7 @@ GIT_WORK.sync = (function(global, cwd) {
 (function(global, argv) {
 
 	let args   = Array.from(argv).filter(v => !v.startsWith('--'));
-	let action = argv.find(v => /^(sync|show)$/g.test(v));
+	let action = argv.find(v => /^(create|sync|show)$/g.test(v));
 
 	if (action !== undefined && typeof GIT_WORK[action] === 'function') {
 
@@ -883,10 +988,10 @@ GIT_WORK.sync = (function(global, cwd) {
 			remote:    null
 		};
 
-
 		Array.from(argv).filter(v => v.startsWith('--')).forEach(value => {
 
 			let tmp = value.substr(2).split('=');
+
 			if (tmp.length === 2) {
 
 				if (tmp[1].startsWith('"')) tmp[1] = tmp[1].substr(1);
